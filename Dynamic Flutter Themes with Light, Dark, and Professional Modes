@@ -1,0 +1,257 @@
+import 'package:flutter/material.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Reddit Clone',
+      theme: Palette.professionalModeBeige,
+      debugShowCheckedModeBanner: false,
+      home: const Homepage(),
+    );
+  }
+}
+
+class Palette {
+  // Colors
+  static const blackColor = Color.fromRGBO(1, 1, 1, 1); // primary color
+  static const greyColor = Color.fromRGBO(26, 39, 45, 1); // secondary color
+  static const drawerColor = Color.fromRGBO(18, 18, 18, 1);
+  static const whiteColor = Colors.white;
+  static var redColor = Colors.red.shade500;
+  static var blueColor = Colors.blue.shade300;
+
+  static const vibrantPurple = Color(0xFF6A0DAD);
+  static const softPink = Color(0xFFFFC0CB);
+  static const tealColor = Color(0xFF008080);
+  static const brightGreen = Color(0xFF00FF00);
+
+  // Themes
+
+  static var darkModeAppTheme = ThemeData.dark().copyWith(
+    scaffoldBackgroundColor: blackColor,
+    cardColor: greyColor,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: drawerColor,
+      iconTheme: IconThemeData(
+        color: whiteColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: drawerColor,
+    ),
+    primaryColor: redColor,
+    colorScheme: const ColorScheme.dark().copyWith(
+      surface: drawerColor,
+      primary: redColor,
+      onPrimary: whiteColor,
+      secondary: blueColor,
+      onSecondary: blackColor,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: whiteColor,
+    ),
+  );
+
+  static var lightModeAppTheme = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: whiteColor,
+    cardColor: greyColor,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: whiteColor,
+      elevation: 0,
+      iconTheme: IconThemeData(
+        color: blackColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: whiteColor,
+    ),
+    primaryColor: redColor,
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: whiteColor,
+      primary: redColor,
+      onPrimary: blackColor,
+      secondary: blueColor,
+      onSecondary: blackColor,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: blackColor,
+    ),
+  );
+
+  static var professionalModeBlue = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: Colors.lightBlue[50],
+    cardColor: Colors.blueGrey[100],
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.lightBlue[700],
+      elevation: 2,
+      iconTheme: const IconThemeData(
+        color: whiteColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.blueGrey,
+    ),
+    primaryColor: Colors.lightBlue,
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: Colors.lightBlue[50],
+      primary: Colors.lightBlue,
+      onPrimary: Colors.white,
+      secondary: Colors.indigo,
+      onSecondary: Colors.white,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: Colors.black,
+    ),
+  );
+
+  static var professionalModeGrey = ThemeData.dark().copyWith(
+    scaffoldBackgroundColor: Colors.grey[900],
+    cardColor: Colors.grey[800],
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.grey[850],
+      elevation: 0,
+      iconTheme: const IconThemeData(
+        color: whiteColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.grey,
+    ),
+    primaryColor: Colors.grey,
+    colorScheme: const ColorScheme.dark().copyWith(
+      surface: Colors.grey[850],
+      primary: Colors.grey,
+      onPrimary: Colors.black,
+      secondary: Colors.blueGrey,
+      onSecondary: Colors.black,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: Colors.white,
+    ),
+  );
+
+  static var professionalModeGreen = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: Colors.green[50],
+    cardColor: Colors.green[100],
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.green[700],
+      elevation: 1,
+      iconTheme: const IconThemeData(
+        color: whiteColor,
+      ),
+    ),
+    drawerTheme: DrawerThemeData(
+      backgroundColor: Colors.green[800],
+    ),
+    primaryColor: Colors.green,
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: Colors.green[50],
+      primary: Colors.green,
+      onPrimary: Colors.white,
+      secondary: Colors.teal,
+      onSecondary: Colors.white,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: Colors.black,
+    ),
+  );
+
+  static var professionalModeBeige = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: const Color(0xFFF5F5DC),
+    cardColor: const Color(0xFFFAF0E6),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFFD2B48C),
+      elevation: 1,
+      iconTheme: IconThemeData(
+        color: blackColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color(0xFFDEB887),
+    ),
+    primaryColor: const Color(0xFFD2B48C),
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: const Color(0xFFF5F5DC),
+      primary: const Color(0xFFD2B48C),
+      onPrimary: Colors.black,
+      secondary: const Color(0xFFFAEBD7),
+      onSecondary: Colors.black,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: Colors.black,
+    ),
+  );
+
+  static var purpleModeAppTheme = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: vibrantPurple,
+    cardColor: softPink,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: vibrantPurple,
+      elevation: 2,
+      iconTheme: IconThemeData(
+        color: whiteColor,
+      ),
+      titleTextStyle: TextStyle(
+        color: whiteColor,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: vibrantPurple,
+    ),
+    primaryColor: softPink,
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: softPink,
+      primary: vibrantPurple,
+      onPrimary: whiteColor,
+      secondary: softPink,
+      onSecondary: blackColor,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: whiteColor,
+    ),
+  );
+
+  static var greenTealModeAppTheme = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: tealColor,
+    cardColor: brightGreen,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: tealColor,
+      elevation: 2,
+      iconTheme: IconThemeData(
+        color: whiteColor,
+      ),
+      titleTextStyle: TextStyle(
+        color: whiteColor,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: tealColor,
+    ),
+    primaryColor: brightGreen,
+    colorScheme: const ColorScheme.light().copyWith(
+      surface: brightGreen,
+      primary: tealColor,
+      onPrimary: blackColor,
+      secondary: brightGreen,
+      onSecondary: blackColor,
+      error: Colors.red,
+      onError: whiteColor,
+      onSurface: blackColor,
+    ),
+  );
+}
