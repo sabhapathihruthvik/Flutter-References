@@ -1,0 +1,101 @@
+import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Connectivity Checker',
+      home: ConnectivityCheckerPage(),
+    );
+  }
+}
+
+class ConnectivityCheckerPage extends StatefulWidget {
+  const ConnectivityCheckerPage({super.key});
+
+  @override
+  State<ConnectivityCheckerPage> createState() =>
+      _ConnectivityCheckerPageState();
+}
+
+class _ConnectivityCheckerPageState extends State<ConnectivityCheckerPage> {
+  late StreamSubscription<List<ConnectivityResult>> _subscription;
+  late Connectivity _connectivity;
+  String _connectionStatus = "Checking connectivity...";
+
+  @override
+  void initState() {
+    super.initState();
+    _connectivity = Connectivity();
+    _initializeConnectivity();
+    _subscription = _connectivity.onConnectivityChanged.listen((result) {
+      _updateConnectionStatus(result);
+    });
+  }
+
+  // Initialize the connectivity
+  Future<void> _initializeConnectivity() async {
+    try {
+      final List<ConnectivityResult> results =
+          await _connectivity.checkConnectivity();
+      _updateConnectionStatus(results);
+    } catch (e) {
+      setState(() {
+        _connectionStatus = "Failed to check connectivity: $e";
+      });
+    }
+  }
+
+  void _updateConnectionStatus(List<ConnectivityResult> results) {
+    setState(() {
+      if (results.contains(ConnectivityResult.mobile)) {
+        _connectionStatus = "Connected via Mobile Network";
+      } else if (results.contains(ConnectivityResult.wifi)) {
+        _connectionStatus = "Connected via Wi-Fi";
+      } else if (results.contains(ConnectivityResult.ethernet)) {
+        _connectionStatus = "Connected via Ethernet";
+      } else if (results.contains(ConnectivityResult.vpn)) {
+        _connectionStatus = "VPN is active";
+      } else if (results.contains(ConnectivityResult.bluetooth)) {
+        _connectionStatus = "Connected via Bluetooth";
+      } else if (results.contains(ConnectivityResult.other)) {
+        _connectionStatus = "Connected to an unknown network";
+      } else if (results.contains(ConnectivityResult.none)) {
+        _connectionStatus = "No Internet Connection";
+      } else {
+        _connectionStatus = "Connectivity check returned unexpected results.";
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Connectivity Checker"),
+      ),
+      body: Center(
+        child: Text(
+          _connectionStatus,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, color: Colors.black87),
+        ),
+      ),
+    );
+  }
+}
