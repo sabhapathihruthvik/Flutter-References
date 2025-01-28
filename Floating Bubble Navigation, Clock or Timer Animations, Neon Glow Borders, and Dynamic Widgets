@@ -1,0 +1,134 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: CreativeUIPage(),
+    );
+  }
+}
+
+class CreativeUIPage extends StatefulWidget {
+  const CreativeUIPage({super.key});
+
+  @override
+  _CreativeUIPageState createState() => _CreativeUIPageState();
+}
+
+class _CreativeUIPageState extends State<CreativeUIPage> {
+  int _secondsLeft = 60;
+  late Timer _timer;
+  double _angle = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    startCountdown();
+  }
+
+  void startCountdown() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft == 0) {
+        _timer.cancel();
+      } else {
+        setState(() {
+          _secondsLeft--;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Creative UI")),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          // Floating Bubble Navigation
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.navigation),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Clock or Timer Animations
+          Center(
+            child: Text(
+              "$_secondsLeft seconds left",
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Neon Glow Borders
+          AnimatedContainer(
+            duration: const Duration(seconds: 2),
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blueAccent.withOpacity(0.7),
+                  spreadRadius: 5,
+                  blurRadius: 15,
+                ),
+              ],
+            ),
+            child: const Text(
+              "Neon Border",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Dynamic Widgets (Transform on Scroll)
+          NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollUpdateNotification) {
+                setState(() {
+                  _angle += 0.5;
+                });
+              }
+              return true;
+            },
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return Transform.rotate(
+                  angle: _angle,
+                  child: ListTile(
+                    title: Text("Item ${index + 1}",
+                        style: const TextStyle(color: Colors.black)),
+                    subtitle: const Text("Dynamic Rotation as You Scroll",
+                        style: TextStyle(color: Colors.black45)),
+                    onTap: () {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
