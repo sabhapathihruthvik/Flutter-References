@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ReorderableListDemo(),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class ReorderableListDemo extends StatefulWidget {
+  const ReorderableListDemo({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ReorderableListDemoState createState() => _ReorderableListDemoState();
+}
+
+class _ReorderableListDemoState extends State<ReorderableListDemo> {
+  final List<String> _items = List.generate(20, (index) => 'Item $index');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Reorderable List")),
+      body: ReorderableListView(
+        onReorder: _onReorder,
+        children: [
+          for (int i = 0; i < _items.length; i++)
+            ListTile(
+              key: Key('$i'),
+              title: Text(_items[i]),
+            )
+        ],
+      ),
+    );
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final item = _items.removeAt(oldIndex);
+      _items.insert(newIndex, item);
+    });
+  }
+}
