@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SpringAnimationDemo(),
+    );
+  }
+}
+
+class SpringAnimationDemo extends StatefulWidget {
+  const SpringAnimationDemo({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _SpringAnimationDemoState createState() => _SpringAnimationDemoState();
+}
+
+class _SpringAnimationDemoState extends State<SpringAnimationDemo>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _springAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    _springAnimation = _controller.drive(Tween(begin: 0.0, end: 200.0)
+        .chain(CurveTween(curve: Curves.easeInOut)));
+    _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Spring Animation")),
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(0, _springAnimation.value),
+              child: const Icon(
+                Icons.star,
+                size: 50,
+                color: Colors.blue,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
