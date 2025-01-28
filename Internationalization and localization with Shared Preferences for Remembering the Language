@@ -1,0 +1,128 @@
+-----For producing the arb files refer to Internationalization with Provider
+
+
+import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// ignore: depend_on_referenced_packages
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final locale = await getSavedLocale(); // Retrieve saved locale
+  runApp(MyApp(locale: locale));
+}
+
+/// Fetch saved locale from SharedPreferences
+Future<Locale> getSavedLocale() async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? languageCode = prefs.getString('languageCode');
+  if (languageCode != null) {
+    return Locale(languageCode);
+  }
+  return const Locale('en'); // Default to English
+}
+
+/// Main App
+class MyApp extends StatelessWidget {
+  final Locale locale;
+  const MyApp({required this.locale, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Multi-language App',
+      locale: locale,
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('hi'), // Hindi
+        Locale('kn'), // Kannada
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomePage(),
+    );
+  }
+}
+
+/// HomePage with a button to navigate to Settings
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.homePageTitle),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          child: Text(AppLocalizations.of(context)!.languageSwitchButton),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// SettingsPage to switch languages
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  Future<void> _changeLanguage(BuildContext context, Locale newLocale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('languageCode', newLocale.languageCode);
+    // Restart the app with the new locale
+    Navigator.pushAndRemoveUntil(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyApp(locale: newLocale),
+      ),
+      (_) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.settingsPageTitle),
+      ),
+      body: Center(
+        child: DropdownButton<Locale>(
+          value: Localizations.localeOf(context),
+          items: const [
+            DropdownMenuItem(
+              value: Locale('en'),
+              child: Text('English'),
+            ),
+            DropdownMenuItem(
+              value: Locale('hi'),
+              child: Text('हिंदी'),
+            ),
+            DropdownMenuItem(
+              value: Locale('kn'),
+              child: Text('ಕನ್ನಡ'),
+            ),
+          ],
+          onChanged: (newLocale) {
+            _changeLanguage(context, newLocale!);
+          },
+        ),
+      ),
+    );
+  }
+}
