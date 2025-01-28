@@ -1,0 +1,172 @@
+
+--lib/l10n/app_en.arb
+{"@@locale": "en",
+  "appTitle": "Multi-language App",
+  "@appTitle": {},
+  "homePageTitle": "Welcome to Home",
+  "@homePageTitle": {},
+  "settingsPageTitle": "Settings",
+  "@settingsPageTitle": {},
+  "languageSwitchButton": "Switch Language",
+  "@languageSwitchButton": {}
+}
+
+  
+--lib/l10n/app_hi.arb
+{"@@locale": "hi",
+    "appTitle": "बहुभाषी ऐप",
+    "@appTitle": {},
+    "homePageTitle": "होम पेज पर स्वागत है",
+    "@homePageTitle": {},
+    "settingsPageTitle": "सेटिंग्स",
+    "@settingsPageTitle": {},
+    "languageSwitchButton": "भाषा बदलें",
+    "@languageSwitchButton": {}
+  }
+
+--lib/l10n/app_kn.arb
+{   "@@locale": "kn",
+    "appTitle": "ಬಹುಭಾಷಾ ಆಪ್",
+    "@appTitle": {},
+    "homePageTitle": "ಮುಖಪುಟಕ್ಕೆ ಸ್ವಾಗತ",
+    "@homePageTitle": {},
+    "settingsPageTitle": "ಸೆಟ್ಟಿಂಗ್ಗಳು",
+    "@settingsPageTitle": {},
+    "languageSwitchButton": "ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸಿ",
+    "@languageSwitchButton": {}
+  }
+
+
+--l10n.yaml
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+
+
+
+
+
+
+
+
+
+////////main.dart
+
+import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+/// LocaleProvider to handle language changes
+class LocaleProvider extends ChangeNotifier {
+  Locale _locale = const Locale('en'); // Default locale
+
+  Locale get locale => _locale;
+
+  void setLocale(Locale locale) {
+    _locale = locale;
+    notifyListeners();
+  }
+}
+
+/// Main App
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<LocaleProvider>(
+      create: (context) => LocaleProvider(),
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Multi-language App',
+            locale: localeProvider.locale,
+            supportedLocales: const [
+              Locale('en'), // English
+              Locale('hi'), // Hindi
+              Locale('kn'), // Kannada
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            theme: ThemeData(primarySwatch: Colors.blue),
+            home: const HomePage(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// HomePage with a button to navigate to Settings
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.homePageTitle),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          child: Text(AppLocalizations.of(context)!.languageSwitchButton),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// SettingsPage to switch languages
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.settingsPageTitle),
+      ),
+      body: Center(
+        child: DropdownButton<Locale>(
+          value: localeProvider.locale,
+          items: const [
+            DropdownMenuItem(
+              value: Locale('en'),
+              child: Text('English'),
+            ),
+            DropdownMenuItem(
+              value: Locale('hi'),
+              child: Text('हिंदी'),
+            ),
+            DropdownMenuItem(
+              value: Locale('kn'),
+              child: Text('ಕನ್ನಡ'),
+            ),
+          ],
+          onChanged: (newLocale) {
+            localeProvider.setLocale(newLocale!);
+          },
+        ),
+      ),
+    );
+  }
+}
