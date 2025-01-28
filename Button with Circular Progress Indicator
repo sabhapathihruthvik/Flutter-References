@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Button with Circular Progress',
+      home: ButtonWithLoadingState(),
+    );
+  }
+}
+
+class ButtonWithLoadingState extends StatefulWidget {
+  const ButtonWithLoadingState({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ButtonWithLoadingState createState() => _ButtonWithLoadingState();
+}
+
+class _ButtonWithLoadingState extends State<ButtonWithLoadingState> {
+  bool _isLoading = false;
+
+  void _simulateLoadingProcess() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulating a network request (e.g., login/signup process)
+    await Future.delayed(const Duration(seconds: 3));
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // Once the loading is done, display a message or move to the next page.
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Operation Completed')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Button with Circular Progress"),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: _isLoading
+              ? null
+              : _simulateLoadingProcess, // Disable button during loading
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(200, 50),
+          ),
+          child: _isLoading
+              ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : const Text("Login / Sign Up"),
+        ),
+      ),
+    );
+  }
+}
