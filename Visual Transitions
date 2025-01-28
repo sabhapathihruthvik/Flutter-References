@@ -1,0 +1,313 @@
+
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Visual Transitions Showcase',
+      home: AnimationShowcase(),
+    );
+  }
+}
+
+class AnimationShowcase extends StatelessWidget {
+  const AnimationShowcase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Visual Transitions")),
+      body: ListView(
+        children: [
+          Section(
+            title: "Hero Animation",
+            widget: const HeroAnimationPage(),
+          ),
+          Section(
+            title: "Circular Reveal Animation",
+            widget: const CircularRevealPage(),
+          ),
+          Section(
+            title: "Page Route Slide/Zoom Transition",
+            widget: const RouteTransitionPage(),
+          ),
+          Section(
+            title: "Custom Curve Transformations",
+            widget: const CurveTransitionPage(),
+          ),
+          Section(
+            title: "Scale Effect (Enlarge/Reduce)",
+            widget: const ScaleEffectPage(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Section extends StatelessWidget {
+  final String title;
+  final Widget widget;
+  const Section({super.key, required this.title, required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      elevation: 4,
+      child: ListTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: IconButton(
+          icon: const Icon(Icons.navigate_next),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => widget),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// -------------------------- HERO ANIMATION ------------------------------
+class HeroAnimationPage extends StatelessWidget {
+  const HeroAnimationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Hero Animation')),
+      body: Center(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const HeroDetailPage(),
+              ),
+            );
+          },
+          child: Hero(
+            tag: 'hero-tag',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset('assets/your_image.jpeg',
+                  height: 150, width: 150, fit: BoxFit.cover),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HeroDetailPage extends StatelessWidget {
+  const HeroDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Hero Animation Detail')),
+      body: Center(
+        child: Hero(
+          tag: 'hero-tag',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset('assets/your_image.jpeg',
+                height: 300, width: 300, fit: BoxFit.cover),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// -------------------------- CIRCULAR REVEAL ANIMATION ------------------------------
+class CircularRevealPage extends StatelessWidget {
+  const CircularRevealPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Circular Reveal Animation")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CircularRevealDetailPage(),
+              ),
+            );
+          },
+          child: const Text("Show Circular Reveal"),
+        ),
+      ),
+    );
+  }
+}
+
+class CircularRevealDetailPage extends StatelessWidget {
+  const CircularRevealDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Circular Reveal Detail")),
+      body: Center(
+        child: AnimatedContainer(
+          duration: const Duration(seconds: 1),
+          height: 200,
+          width: 200,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// -------------------------- PAGE ROUTE SLIDE/ZOOM TRANSITION ------------------------------
+class RouteTransitionPage extends StatelessWidget {
+  const RouteTransitionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Slide/Zoom Transition")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const RouteTransitionDetailPage();
+                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var offsetTween = Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  );
+                  var scaleTween = Tween<double>(
+                    begin: 0.1,
+                    end: 1.0,
+                  );
+                  return SlideTransition(
+                    position: offsetTween.animate(animation),
+                    child: ScaleTransition(
+                      scale: scaleTween.animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+          child: const Text("Go to Detail Page"),
+        ),
+      ),
+    );
+  }
+}
+
+class RouteTransitionDetailPage extends StatelessWidget {
+  const RouteTransitionDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Detail Page")),
+      body: const Center(child: Text('This is the detail page')),
+    );
+  }
+}
+
+// -------------------------- CUSTOM CURVE TRANSFORMATIONS ------------------------------
+class CurveTransitionPage extends StatefulWidget {
+  const CurveTransitionPage({super.key});
+
+  @override
+  _CurveTransitionPageState createState() => _CurveTransitionPageState();
+}
+
+class _CurveTransitionPageState extends State<CurveTransitionPage> {
+  double _value = 0.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Custom Curve Transformation")),
+      body: Center(
+        child: GestureDetector(
+          onPanUpdate: (details) {
+            setState(() {
+              _value += details.localPosition.dy / 100;
+            });
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 200 + _value,
+            height: 200 + _value,
+            color: Colors.blue,
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                'Drag Me',
+                style: TextStyle(color: Colors.white, fontSize: 16 + _value),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// -------------------------- SCALE EFFECT ------------------------------
+class ScaleEffectPage extends StatefulWidget {
+  const ScaleEffectPage({super.key});
+
+  @override
+  _ScaleEffectPageState createState() => _ScaleEffectPageState();
+}
+
+class _ScaleEffectPageState extends State<ScaleEffectPage> {
+  double _scale = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Scale Effect (Enlarge/Reduce)")),
+      body: Center(
+        child: GestureDetector(
+          onScaleUpdate: (details) {
+            setState(() {
+              _scale = details.scale;
+            });
+          },
+          child: Transform.scale(
+            scale: _scale,
+            child: const Icon(
+              Icons.star,
+              size: 100,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
