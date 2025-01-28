@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'UI Animation Showcase',
+      home: AnimationShowcase(),
+    );
+  }
+}
+
+class AnimationShowcase extends StatelessWidget {
+  const AnimationShowcase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("UI Animation Showcase")),
+      body: const AnimatedDrawer(),
+    );
+  }
+}
+
+class AnimatedDrawer extends StatelessWidget {
+  const AnimatedDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Animated Drawer'),
+            ),
+            ListTile(
+              title: const Text('Item 1'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              title: const Text('Item 2'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+      body: Stack(
+        children: [
+          const Center(
+              child: Text("Swipe from the left edge to open the drawer.")),
+          Positioned.fill(
+            child: GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity != null &&
+                    details.primaryVelocity! > 0) {
+                  Scaffold.of(context).openDrawer();
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
