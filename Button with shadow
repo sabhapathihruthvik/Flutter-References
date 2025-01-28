@@ -1,0 +1,101 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Button Animations',
+      home: ButtonAnimationShowcase(),
+    );
+  }
+}
+
+class ButtonAnimationShowcase extends StatelessWidget {
+  const ButtonAnimationShowcase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Button Animation Showcase"),
+      ),
+      body: ListView(
+        children: const [
+          Section(
+            title: 'Button with Shadow',
+            widget: ButtonWithShadow(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Section Widget for Displaying Example Sections
+class Section extends StatelessWidget {
+  final String title;
+  final Widget widget;
+
+  const Section({super.key, required this.title, required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          widget,
+        ],
+      ),
+    );
+  }
+}
+
+// Button with Shadow
+class ButtonWithShadow extends StatefulWidget {
+  const ButtonWithShadow({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ButtonWithShadowState createState() => _ButtonWithShadowState();
+}
+
+class _ButtonWithShadowState extends State<ButtonWithShadow> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () {
+        setState(() {
+          _isPressed = true;
+        });
+      },
+      onLongPressEnd: (details) {
+        setState(() {
+          _isPressed = false;
+        });
+      },
+      child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          elevation: _isPressed ? 15 : 5, // Higher elevation when pressed
+          shadowColor: Colors.black,
+        ),
+        child: const Text("Button with Shadow"),
+      ),
+    );
+  }
+}
