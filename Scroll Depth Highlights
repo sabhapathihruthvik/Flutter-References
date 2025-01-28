@@ -1,0 +1,53 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ScrollDepthHighlightsDemo(),
+    );
+  }
+}
+
+class ScrollDepthHighlightsDemo extends StatefulWidget {
+  const ScrollDepthHighlightsDemo({super.key});
+
+  @override
+  _ScrollDepthHighlightsDemoState createState() => _ScrollDepthHighlightsDemoState();
+}
+
+class _ScrollDepthHighlightsDemoState extends State<ScrollDepthHighlightsDemo> {
+  double _scrollProgress = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Scroll Depth Highlights")),
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (scrollInfo) {
+          if (scrollInfo is ScrollUpdateNotification) {
+            setState(() {
+              _scrollProgress = (scrollInfo.metrics.pixels /
+                  scrollInfo.metrics.maxScrollExtent);
+            });
+          }
+          return true;
+        },
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (context, index) {
+            return ListTile(
+              tileColor: _scrollProgress > 0.5 ? Colors.blue : Colors.white,
+              title: Text('Item $index'),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
