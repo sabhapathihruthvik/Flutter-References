@@ -1,0 +1,202 @@
+import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:shimmer/shimmer.dart';
+
+void main() {
+  runApp(const TextEffectsDemo());
+}
+
+class TextEffectsDemo extends StatelessWidget {
+  const TextEffectsDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Text Effects Demo',
+      home: TextEffectsPage(),
+    );
+  }
+}
+
+class TextEffectsPage extends StatelessWidget {
+  const TextEffectsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Text Effects Demo'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Marquee Effect:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Container(
+              height: 50,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              child: Marquee(
+                text: 'This is a Marquee Effect! ',
+                style: const TextStyle(fontSize: 24),
+                scrollAxis: Axis.horizontal,
+                blankSpace: 20.0,
+                velocity: 100.0,
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Typewriter Effect:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  'This is a Typewriter Effect! ',
+                  textStyle: const TextStyle(fontSize: 24),
+                  speed: const Duration(milliseconds: 100),
+                ),
+              ],
+              totalRepeatCount: 2,
+            ),
+            const Divider(),
+            const Text(
+              'Fade In/Fade Out Effect:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                FadeAnimatedText('Fade In...',
+                    textStyle: const TextStyle(fontSize: 24)),
+                FadeAnimatedText('Fade Out...',
+                    textStyle: const TextStyle(fontSize: 24)),
+              ],
+              repeatForever: true,
+            ),
+            const Divider(),
+            const Text(
+              'Bouncing Text:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                ScaleAnimatedText(
+                  'Bounce! ',
+                  textStyle: const TextStyle(fontSize: 24),
+                ),
+              ],
+              //totalRepeatCount: 3,
+              repeatForever: true,
+            ),
+            const Divider(),
+            const Text(
+              'Gradient Text:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Colors.purple, Colors.blue],
+              ).createShader(bounds),
+              child: const Text(
+                'Gradient Effect ',
+                style: TextStyle(fontSize: 24),
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Highlighting Text:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const Text.rich(
+              TextSpan(
+                text: 'Highlighting ',
+                style: TextStyle(fontSize: 24),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'Text!',
+                    style: TextStyle(backgroundColor: Colors.yellow),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Text Transform (Size Flip):',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                ScaleAnimatedText(
+                  'Transform Me! ',
+                  textStyle: const TextStyle(fontSize: 24),
+                  scalingFactor: 0.5,
+                ),
+              ],
+              totalRepeatCount: 2,
+            ),
+            const Divider(),
+            const Text(
+              'Glitch Text Effect:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Stack(
+              children: [
+                Text(
+                  'Glitch Effect ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.red.withOpacity(0.7),
+                  ),
+                ),
+                Positioned(
+                  left: 2,
+                  top: 1,
+                  child: Text(
+                    'Glitch Effect ',
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.blue.withOpacity(0.7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            const Text(
+              'Shimmer Effect:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Shimmer.fromColors(
+              baseColor: Colors.grey,
+              highlightColor: Colors.white,
+              child: const Text(
+                'Shimmering Text ',
+                style: TextStyle(fontSize: 24),
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Wave Text Animation:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                WavyAnimatedText(
+                  'Wavy Text ',
+                  textStyle: const TextStyle(fontSize: 24),
+                ),
+              ],
+              repeatForever: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
