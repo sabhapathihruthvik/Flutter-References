@@ -43,7 +43,16 @@ template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
 
 
+--lib/l10n/l10n.dart
+import 'package:flutter/material.dart';
 
+class L10n {
+  static final all = [
+    const Locale('en'),
+    const Locale('hi'),
+    const Locale('kn'),
+  ];
+}
 
 
 
