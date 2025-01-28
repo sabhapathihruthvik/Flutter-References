@@ -1,0 +1,337 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'UI Animation Showcase',
+      home: AnimationShowcase(),
+    );
+  }
+}
+
+class AnimationShowcase extends StatelessWidget {
+  const AnimationShowcase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("UI Animation Showcase")),
+      body: ListView(
+        children: const [
+          Section(
+            title: "Background Blur Transition",
+            widget: BackgroundBlurTransition(),
+          ),
+          Section(
+            title: "Animated Overlay",
+            widget: AnimatedOverlay(),
+          ),
+          Section(
+            title: "Pop-Up Animation Effect",
+            widget: PopUpAnimation(),
+          ),
+          Section(
+            title: "Ripple Effect on Buttons",
+            widget: RippleEffect(),
+          ),
+          Section(
+            title: "Visual Transition",
+            widget: VisualTransition(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Section extends StatelessWidget {
+  final String title;
+  final Widget widget;
+
+  const Section({super.key, required this.title, required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(title,
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        ),
+        widget,
+        const SizedBox(height: 50),
+      ],
+    );
+  }
+}
+
+// Visual Transition with page transitions between sections
+class VisualTransition extends StatefulWidget {
+  const VisualTransition({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _VisualTransitionState createState() => _VisualTransitionState();
+}
+
+class _VisualTransitionState extends State<VisualTransition> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const NextPage();
+            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              return SlideTransition(position: offsetAnimation, child: child);
+            },
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.pink, Colors.purple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            'Tap for Visual Transition to Next Page',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NextPage extends StatelessWidget {
+  const NextPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Next Page')),
+      body: const Center(
+        child: Text('You have navigated with a visual transition!',
+            style: TextStyle(fontSize: 18)),
+      ),
+    );
+  }
+}
+
+// Background Blur Transition
+class BackgroundBlurTransition extends StatefulWidget {
+  const BackgroundBlurTransition({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _BackgroundBlurTransitionState createState() =>
+      _BackgroundBlurTransitionState();
+}
+
+class _BackgroundBlurTransitionState extends State<BackgroundBlurTransition> {
+  bool _isBlurred = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isBlurred = !_isBlurred;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(seconds: 1),
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+          borderRadius: BorderRadius.circular(16),
+          image: _isBlurred
+              ? DecorationImage(
+                  image: const AssetImage("assets/your_image.jpeg"),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5),
+                    BlendMode.darken,
+                  ),
+                )
+              : null,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (_isBlurred)
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: const SizedBox.expand(),
+              ),
+            const Center(
+              child: Text(
+                'Tap to Apply Background Blur',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Animated Overlay
+class AnimatedOverlay extends StatefulWidget {
+  const AnimatedOverlay({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _AnimatedOverlayState createState() => _AnimatedOverlayState();
+}
+
+class _AnimatedOverlayState extends State<AnimatedOverlay> {
+  bool _overlayVisible = false;
+
+  void _toggleOverlay() {
+    setState(() {
+      _overlayVisible = !_overlayVisible;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: _toggleOverlay,
+          child: Container(
+            height: 200,
+            color: Colors.purpleAccent,
+            child: const Center(
+              child: Text(
+                'Tap to Show Overlay',
+                style: TextStyle(color: Colors.white, fontSize: 22),
+              ),
+            ),
+          ),
+        ),
+        if (_overlayVisible)
+          AnimatedOpacity(
+            opacity: _overlayVisible ? 0.7 : 0.0,
+            duration: const Duration(seconds: 1),
+            child: Container(
+              color: Colors.black.withOpacity(0.7),
+              child: const Center(
+                child: Text(
+                  'This is an overlay',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// Pop-Up Animation Effect
+class PopUpAnimation extends StatefulWidget {
+  const PopUpAnimation({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _PopUpAnimationState createState() => _PopUpAnimationState();
+}
+
+class _PopUpAnimationState extends State<PopUpAnimation>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _popUpAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _popUpAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _popUpAnimation,
+      child: Container(
+        width: 300,
+        height: 100,
+        color: Colors.orangeAccent,
+        child: const Center(
+          child: Text(
+            'Pop-up Effect',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Ripple Effect on Buttons
+class RippleEffect extends StatelessWidget {
+  const RippleEffect({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Action on tap
+          },
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Ripple Effect Button',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
