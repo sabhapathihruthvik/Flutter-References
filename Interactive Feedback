@@ -1,0 +1,197 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:confetti/confetti.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: InteractiveFeedbackPage(),
+    );
+  }
+}
+
+class InteractiveFeedbackPage extends StatefulWidget {
+  const InteractiveFeedbackPage({super.key});
+
+  @override
+  _InteractiveFeedbackPageState createState() => _InteractiveFeedbackPageState();
+}
+
+class _InteractiveFeedbackPageState extends State<InteractiveFeedbackPage> {
+  late final ConfettiController _confettiController;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isLiked = false;
+  bool _isError = false;
+  bool _isSuccess = false;
+  bool _isClapped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  // Shake animation for error message
+  void triggerError() {
+    setState(() {
+      _isError = true;
+    });
+
+    // Shake animation logic
+    Future.delayed(const Duration(milliseconds: 200), () {
+      setState(() {
+        _isError = false;
+      });
+    });
+  }
+
+  // Confetti on success
+  void triggerSuccess() {
+    _confettiController.play();
+    setState(() {
+      _isSuccess = true;
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _isSuccess = false;
+      });
+    });
+  }
+
+  // Fireworks/Particle effect
+  void triggerFireworks() {
+    _confettiController.play();
+  }
+
+  // Clap/Like Button animation
+  void toggleLike() {
+    setState(() {
+      _isLiked = !_isLiked;
+    });
+    _isLiked ? _triggerClap() : null;
+  }
+
+  // Clap animation logic
+  void _triggerClap() {
+    setState(() {
+      _isClapped = true;
+    });
+
+    // After 500 ms, reset clap state
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setState(() {
+        _isClapped = false;
+      });
+    });
+  }
+
+  // Long press effect animation
+  void _onLongPress() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Long Pressed!'),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Interactive Feedback")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            // Shake Animation for Errors
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              transform: Matrix4.translationValues(
+                  _isError ? 10.0 : 0.0, 0.0, 0.0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: "Error Trigger",
+                  errorText: _isError ? "There was an error" : null,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Confetti Burst on Success
+            ElevatedButton(
+              onPressed: triggerSuccess,
+              child: const Text("Submit Success"),
+            ),
+            const SizedBox(height: 20),
+
+            // Fireworks/Particle Effects
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: 0,
+              numberOfParticles: 30,
+              gravity: 0.2,
+            ),
+            const SizedBox(height: 20),
+
+            // Clap/Like Button Animations
+            GestureDetector(
+              onTap: toggleLike,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _isLiked ? 70 : 60,
+                width: _isLiked ? 70 : 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _isLiked ? Colors.red : Colors.grey,
+                ),
+                child: Center(
+                  child: _isClapped
+                      ? const Icon(Icons.favorite, size: 40, color: Colors.white)
+                      : const Icon(Icons.favorite_border, size: 40, color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Long-Press Hold Animation
+            GestureDetector(
+              onLongPress: _onLongPress,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 200,
+                height: 60,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.blue,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: _isError ? 10.0 : 5.0,
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  "Long Press Me",
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
