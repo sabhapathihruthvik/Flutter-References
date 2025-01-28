@@ -1,0 +1,262 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Navigation Types Showcase',
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Navigation Types Showcase"),
+      ),
+      body: ListView(
+        children: const [
+          Section(
+            title: 'Standard Navigation',
+            widget: StandardNavigation(),
+          ),
+          Section(
+            title: 'Custom Page Transition',
+            widget: CustomPageTransition(),
+          ),
+          Section(
+            title: 'Bottom Sheet Navigation',
+            widget: BottomSheetNavigation(),
+          ),
+          Section(
+            title: 'Dialog-based Navigation',
+            widget: DialogNavigation(),
+          ),
+          Section(
+            title: 'Custom Animated Navigation',
+            widget: CustomAnimatedNavigation(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Section Widget for Displaying Example Sections
+class Section extends StatelessWidget {
+  final String title;
+  final Widget widget;
+
+  const Section({super.key, required this.title, required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          widget,
+        ],
+      ),
+    );
+  }
+}
+
+// Standard Navigation (MaterialPageRoute)
+class StandardNavigation extends StatelessWidget {
+  const StandardNavigation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NextPage()),
+        );
+      },
+      child: const Text("Go to Next Page"),
+    );
+  }
+}
+
+// Custom Page Transition Navigation (PageRouteBuilder)
+class CustomPageTransition extends StatelessWidget {
+  const CustomPageTransition({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const NextPage();
+            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              return SlideTransition(position: offsetAnimation, child: child);
+            },
+          ),
+        );
+      },
+      child: const Text("Go with Custom Transition"),
+    );
+  }
+}
+
+// Bottom Sheet Navigation
+class BottomSheetNavigation extends StatelessWidget {
+  const BottomSheetNavigation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return const BottomSheetContent();
+          },
+        );
+      },
+      child: const Text("Show Bottom Sheet Navigation"),
+    );
+  }
+}
+
+class BottomSheetContent extends StatelessWidget {
+  const BottomSheetContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        ListTile(
+          title: const Text("Item 1 in Bottom Sheet"),
+          onTap: () => Navigator.pop(context),
+        ),
+        ListTile(
+          title: const Text("Item 2 in Bottom Sheet"),
+          onTap: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+}
+
+// Dialog-based Navigation (Simple Dialog for navigation)
+class DialogNavigation extends StatelessWidget {
+  const DialogNavigation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Dialog Navigation"),
+              content: const Text("Would you like to go to next page?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NextPage()),
+                    );
+                  },
+                  child: const Text("Go to Next Page"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: const Text("Show Dialog for Navigation"),
+    );
+  }
+}
+
+// Custom Animated Navigation (With Fade-in Transition)
+class CustomAnimatedNavigation extends StatelessWidget {
+  const CustomAnimatedNavigation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const NextPage();
+            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+          ),
+        );
+      },
+      child: const Text("Navigate with Fade-in Transition"),
+    );
+  }
+}
+
+// Next Page - Shows after every navigation
+class NextPage extends StatelessWidget {
+  const NextPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Next Page')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text("Back to Home Page"),
+        ),
+      ),
+    );
+  }
+}
