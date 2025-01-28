@@ -1,0 +1,183 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:video_player/video_player.dart';
+import 'package:file_picker/file_picker.dart';
+
+void main() => runApp(const MediaApp());
+
+class MediaApp extends StatelessWidget {
+  const MediaApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MediaHomePage(),
+    );
+  }
+}
+
+class MediaHomePage extends StatefulWidget {
+  const MediaHomePage({super.key});
+
+  @override
+  State<MediaHomePage> createState() => _MediaHomePageState();
+}
+
+class _MediaHomePageState extends State<MediaHomePage> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  VideoPlayerController? _videoController;
+
+  String? _audioFilePath;
+  String? _videoFilePath;
+
+  bool _isAudioPlaying = false;
+  bool _isVideoPlaying = false;
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickAudioFile() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (result != null) {
+      _audioFilePath = result.files.single.path;
+      await _audioPlayer.setFilePath(_audioFilePath!);
+      setState(() {});
+    }
+  }
+
+  Future<void> _pickVideoFile() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.video);
+    if (result != null) {
+      _videoFilePath = result.files.single.path;
+      _videoController = VideoPlayerController.file(File(_videoFilePath!))
+        ..initialize().then((_) {
+          setState(() {});
+        });
+    }
+  }
+
+  void _playAudio() async {
+    await _audioPlayer.play();
+    setState(() {
+      _isAudioPlaying = true;
+    });
+  }
+
+  void _pauseAudio() async {
+    await _audioPlayer.pause();
+    setState(() {
+      _isAudioPlaying = false;
+    });
+  }
+
+  void _stopAudio() async {
+    await _audioPlayer.stop();
+    setState(() {
+      _isAudioPlaying = false;
+    });
+  }
+
+  void _playVideo() {
+    _videoController?.play();
+    setState(() {
+      _isVideoPlaying = true;
+    });
+  }
+
+  void _pauseVideo() {
+    _videoController?.pause();
+    setState(() {
+      _isVideoPlaying = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Media Player'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Audio Section
+              const Text(
+                'Audio Player',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _pickAudioFile,
+                child: const Text('Pick Audio File'),
+              ),
+              if (_audioFilePath != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: _isAudioPlaying ? null : _playAudio,
+                      icon: const Icon(Icons.play_arrow),
+                    ),
+                    IconButton(
+                      onPressed: _isAudioPlaying ? _pauseAudio : null,
+                      icon: const Icon(Icons.pause),
+                    ),
+                    IconButton(
+                      onPressed: _stopAudio,
+                      icon: const Icon(Icons.stop),
+                    ),
+                  ],
+                ),
+              ],
+
+              const Divider(),
+              // Video Section
+              const Text(
+                'Video Player',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _pickVideoFile,
+                child: const Text('Pick Video File'),
+              ),
+              if (_videoController != null) ...[
+                const SizedBox(height: 10),
+                AspectRatio(
+                  aspectRatio: _videoController!.value.aspectRatio,
+                  child: VideoPlayer(_videoController!),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: _isVideoPlaying ? null : _playVideo,
+                      icon: const Icon(Icons.play_arrow),
+                    ),
+                    IconButton(
+                      onPressed: _isVideoPlaying ? _pauseVideo : null,
+                      icon: const Icon(Icons.pause),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
