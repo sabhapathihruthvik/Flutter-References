@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -37,7 +37,6 @@ class _MyAppState extends State<MyApp> {
         InitializationSettings(android: androidSettings, iOS: iosSettings);
 
     await _flutterLocalNotificationsPlugin.initialize(settings);
-    tz.initializeTimeZones(); // Ensure TimeZones are initialized
   }
 
   Future<void> _showInstantNotification(String message) async {
@@ -60,29 +59,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _scheduleNotification(String message, int seconds) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'scheduled_channel',
-      'Scheduled Notifications',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    const NotificationDetails notificationDetails =
-        NotificationDetails(android: androidDetails);
-
-    final scheduledTime =
-        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      1,
-      'Scheduled Notification',
-      message,
-      scheduledTime,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exact,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+    if (kDebugMode) {
+      print('Waiting for $seconds seconds...');
+    }
+    await Future.delayed(Duration(seconds: seconds));
+    if (kDebugMode) {
+      print('Time elapsed: Showing notification now!');
+    }
+    _showInstantNotification(message);
   }
 
   @override
