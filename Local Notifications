@@ -1,0 +1,136 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings();
+
+    const InitializationSettings settings =
+        InitializationSettings(android: androidSettings, iOS: iosSettings);
+
+    await _flutterLocalNotificationsPlugin.initialize(settings);
+    tz.initializeTimeZones(); // Ensure TimeZones are initialized
+  }
+
+  Future<void> _showInstantNotification(String message) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'instant_channel',
+      'Instant Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0,
+      'New Notification',
+      message,
+      notificationDetails,
+    );
+  }
+
+  Future<void> _scheduleNotification(String message, int seconds) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'scheduled_channel',
+      'Scheduled Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
+
+    final scheduledTime =
+        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      1,
+      'Scheduled Notification',
+      message,
+      scheduledTime,
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exact,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Flutter Local Notifications')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _messageController,
+                decoration: const InputDecoration(labelText: 'Enter message'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  final message = _messageController.text;
+                  if (message.isNotEmpty) {
+                    _showInstantNotification(message);
+                  }
+                },
+                child: const Text('Show Instant Notification'),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _timeController,
+                decoration:
+                    const InputDecoration(labelText: 'Enter delay (seconds)'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  final message = _messageController.text;
+                  final seconds = int.tryParse(_timeController.text) ?? 0;
+                  if (message.isNotEmpty && seconds > 0) {
+                    _scheduleNotification(message, seconds);
+                  }
+                },
+                child: const Text('Schedule Notification'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
