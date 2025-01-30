@@ -1,0 +1,209 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:upi_india/upi_india.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Test UPI Payment',
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  Future<UpiResponse>? _transaction;
+  final UpiIndia _upiIndia = UpiIndia();
+  List<UpiApp>? apps;
+
+  TextStyle header = const TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+  TextStyle value = const TextStyle(fontSize: 14, fontWeight: FontWeight.w400);
+
+  @override
+  void initState() {
+    super.initState();
+    _upiIndia.getAllUpiApps(mandatoryTransactionId: false).then((value) {
+      setState(() {
+        apps = value;
+      });
+    }).catchError((e) {
+      setState(() {
+        apps = [];
+      });
+    });
+  }
+
+  Future<UpiResponse> initiateTransaction(UpiApp app) async {
+    return _upiIndia.startTransaction(
+      app: app,
+      receiverUpiId: "7780593512@ibl", // ✅ Valid UPI ID
+      receiverName: "mk", // ✅ Name of payee
+      transactionRefId: "SAMPLE123", // ✅ Unique transaction ID
+      transactionNote: "Payment for Flutter Course", // ✅ Transaction Note
+      amount: 1.00, // ✅ Minimum ₹1 required
+    );
+  }
+
+  Widget displayUpiApps() {
+    if (apps == null) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (apps!.isEmpty) {
+      return Center(
+        child: Text("No UPI apps found!", style: header),
+      );
+    } else {
+      return Align(
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Wrap(
+            spacing: 10,
+            children: apps!.map((UpiApp app) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _transaction = initiateTransaction(app);
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.memory(app.icon, height: 60, width: 60),
+                      const SizedBox(height: 5),
+                      Text(app.name, textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    }
+  }
+
+  String _upiErrorHandler(error) {
+    if (error is UpiIndiaAppNotInstalledException) {
+      return 'Requested UPI app is not installed.';
+    } else if (error is UpiIndiaUserCancelledException) {
+      return 'Transaction was cancelled.';
+    } else if (error is UpiIndiaNullResponseException) {
+      return 'No response from the UPI app.';
+    } else if (error is UpiIndiaInvalidParametersException) {
+      return 'Invalid UPI parameters.';
+    } else {
+      return 'An unknown error occurred.';
+    }
+  }
+
+  void _checkTxnStatus(String status) {
+    switch (status) {
+      case UpiPaymentStatus.SUCCESS:
+        if (kDebugMode) {
+          print('Transaction Successful');
+        }
+        break;
+      case UpiPaymentStatus.SUBMITTED:
+        if (kDebugMode) {
+          print('Transaction Submitted');
+        }
+        break;
+      case UpiPaymentStatus.FAILURE:
+        if (kDebugMode) {
+          print('Transaction Failed');
+        }
+        break;
+      default:
+        if (kDebugMode) {
+          print('Unknown transaction status');
+        }
+    }
+  }
+
+  Widget displayTransactionData(String title, String body) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("$title:", style: header),
+          Expanded(
+            child: Text(body, style: value, textAlign: TextAlign.end),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('UPI Payment')),
+      body: Column(
+        children: [
+          Expanded(child: displayUpiApps()),
+          Expanded(
+            child: FutureBuilder<UpiResponse>(
+              future: _transaction,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(_upiErrorHandler(snapshot.error!),
+                          style: header),
+                    );
+                  }
+
+                  UpiResponse upiResponse = snapshot.data!;
+                  String txnId = upiResponse.transactionId ?? 'N/A';
+                  String resCode = upiResponse.responseCode ?? 'N/A';
+                  String txnRef = upiResponse.transactionRefId ?? 'N/A';
+                  String status = upiResponse.status ?? 'N/A';
+                  String approvalRef = upiResponse.approvalRefNo ?? 'N/A';
+                  _checkTxnStatus(status);
+
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        displayTransactionData('Transaction Id', txnId),
+                        displayTransactionData('Response Code', resCode),
+                        displayTransactionData('Reference Id', txnRef),
+                        displayTransactionData('Status', status.toUpperCase()),
+                        displayTransactionData('Approval No', approvalRef),
+                      ],
+                    ),
+                  );
+                } else {
+                  return const Center(child: Text(''));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
