@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: PaginatedSearchScreen(),
+    );
+  }
+}
+
+class PaginatedSearchScreen extends StatefulWidget {
+  @override
+  _PaginatedSearchScreenState createState() => _PaginatedSearchScreenState();
+}
+
+class _PaginatedSearchScreenState extends State<PaginatedSearchScreen> {
+  TextEditingController _controller = TextEditingController();
+  List<String> _data = List.generate(1000, (index) => 'Item $index');
+  List<String> _filteredData = [];
+  int _page = 0;
+  static const int _pageSize = 50;
+
+  void _filterData(String query) {
+    setState(() {
+      _filteredData = _data
+          .where((item) => item.toLowerCase().contains(query.toLowerCase()))
+          .take((_page + 1) * _pageSize)
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Paginated Search')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(hintText: 'Search...'),
+              onChanged: _filterData,
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredData.length,
+                itemBuilder: (context, index) {
+                  if (index == _filteredData.length - 1) {
+                    setState(() {
+                      _page++;
+                    });
+                  }
+                  return ListTile(title: Text(_filteredData[index]));
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
