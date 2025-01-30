@@ -1,0 +1,64 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: FirestoreSearchScreen(),
+    );
+  }
+}
+
+class FirestoreSearchScreen extends StatefulWidget {
+  @override
+  _FirestoreSearchScreenState createState() => _FirestoreSearchScreenState();
+}
+
+class _FirestoreSearchScreenState extends State<FirestoreSearchScreen> {
+  TextEditingController _controller = TextEditingController();
+  List<DocumentSnapshot> _searchResults = [];
+
+  void _searchFirestore(String query) async {
+    var results = await FirebaseFirestore.instance
+        .collection('items') // Replace with your collection name
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+        .get();
+
+    setState(() {
+      _searchResults = results.docs;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Firestore Real-Time Search')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(hintText: 'Search in Firestore...'),
+              onChanged: _searchFirestore,
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_searchResults[index]['name']),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
