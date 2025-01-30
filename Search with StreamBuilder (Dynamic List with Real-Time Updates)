@@ -1,0 +1,78 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: StreamSearchScreen(),
+    );
+  }
+}
+
+class StreamSearchScreen extends StatefulWidget {
+  @override
+  _StreamSearchScreenState createState() => _StreamSearchScreenState();
+}
+
+class _StreamSearchScreenState extends State<StreamSearchScreen> {
+  TextEditingController _controller = TextEditingController();
+  String _searchQuery = '';
+
+  Stream<List<DocumentSnapshot>> _getSearchResults(String query) {
+    return FirebaseFirestore.instance
+        .collection('items') // Replace with your collection name
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+        .snapshots()
+        .map((snapshot) => snapshot.docs);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Stream Real-Time Search')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(hintText: 'Search...'),
+              onChanged: (query) {
+                setState(() {
+                  _searchQuery = query;
+                });
+              },
+            ),
+            Expanded(
+              child: StreamBuilder<List<DocumentSnapshot>>(
+                stream: _getSearchResults(_searchQuery),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No results found.'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data![index]['name']),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
