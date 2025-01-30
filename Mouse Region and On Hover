@@ -1,0 +1,66 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AnimatedTileDemo(),
+    );
+  }
+}
+
+class AnimatedTileDemo extends StatefulWidget {
+  const AnimatedTileDemo({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _AnimatedTileDemoState createState() => _AnimatedTileDemoState();
+}
+
+class _AnimatedTileDemoState extends State<AnimatedTileDemo> {
+  int? hoveredIndex;
+  int a = 0;
+  void count() {
+    setState(() {
+      a += 1;
+      if (kDebugMode) {
+        print(a);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Animated ListTile Hover Effect')),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return MouseRegion(
+            // ignore: avoid_print
+            onEnter: (_) => print("Mouse Entered"),
+            // ignore: avoid_print
+            onExit: (_) => print("Mouse Exited"),
+            cursor: SystemMouseCursors.click,
+            // ignore: avoid_print
+            onHover: (_) => count(),
+            child: Container(
+              width: 100,
+              height: 50,
+              color: Colors.blue,
+              child: const Center(child: Text("Hover Me")),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
