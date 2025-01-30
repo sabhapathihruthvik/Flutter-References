@@ -1,0 +1,74 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HoverListDemo(),
+    );
+  }
+}
+
+class HoverListDemo extends StatefulWidget {
+  @override
+  _HoverListDemoState createState() => _HoverListDemoState();
+}
+
+class _HoverListDemoState extends State<HoverListDemo> {
+  int? hoveredIndex;
+  Set<int> printedIndexes = {}; // Store indexes that are printed once
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Hover Effect on List')),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return MouseRegion(
+            onEnter: (_) {
+              if (!printedIndexes.contains(index)) {
+                if (kDebugMode) {
+                  print("Hovered on index: $index");
+                }
+                printedIndexes.add(index);
+              }
+              setState(() => hoveredIndex = index);
+            },
+            onExit: (_) => setState(() => hoveredIndex = null),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 20),
+              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: hoveredIndex == index ? Colors.purple : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: hoveredIndex == index
+                    ? [
+                        BoxShadow(
+                            color: Colors.purple.withOpacity(0.5),
+                            blurRadius: 5)
+                      ]
+                    : [],
+              ),
+              child: ListTile(
+                title: Text(
+                  hoveredIndex == index ? 'Hovered Item' : 'Item $index',
+                  style: TextStyle(
+                      color:
+                          hoveredIndex == index ? Colors.white : Colors.black),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
