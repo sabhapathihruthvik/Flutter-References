@@ -1,0 +1,247 @@
+---app.py
+
+
+
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
+
+# 1️⃣ ASCII Conversion
+@app.route('/ascii', methods=['GET'])
+def return_ascii():
+    char = request.args.get('char', '')
+    if char:
+        return jsonify({"output": ord(char[0])})
+    return jsonify({"output": "Invalid input"})
+
+# 2️⃣ Reverse String
+@app.route('/reverse', methods=['GET'])
+def reverse_string():
+    text = request.args.get('text', '')
+    if text:
+        return jsonify({"output": text[::-1]})
+    return jsonify({"output": "Invalid input"})
+
+# 3️⃣ Square of a Number
+@app.route('/square', methods=['GET'])
+def square_number():
+    num = request.args.get('num', '')
+    if num.isdigit():
+        return jsonify({"output": int(num) ** 2})
+    return jsonify({"output": "Invalid square input"})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+
+
+
+
+
+
+---main.dart
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const MyApp());
+}
+
+// API Service
+class ApiService {
+  final String baseUrl = "http://10.0.2.2:5000"; // Flask API base URL
+
+  Future<String> getAscii(String char) async {
+    final response = await http.get(Uri.parse("$baseUrl/ascii?char=$char"));
+    return _handleResponse(response);
+  }
+
+  Future<String> reverseString(String text) async {
+    final response = await http.get(Uri.parse("$baseUrl/reverse?text=$text"));
+    return _handleResponse(response);
+  }
+
+  Future<String> squareNumber(String num) async {
+    final response = await http.get(Uri.parse("$baseUrl/square?num=$num"));
+    return _handleResponse(response);
+  }
+
+  String _handleResponse(http.Response response) {
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)["output"].toString();
+    } else {
+      return "Error: Unable to fetch data";
+    }
+  }
+}
+
+// Main App
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(),
+    );
+  }
+}
+
+// Home Screen
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Multi-Function API")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const AsciiScreen())),
+              child: const Text("Get ASCII Value"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ReverseScreen())),
+              child: const Text("Reverse String"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const SquareScreen())),
+              child: const Text("Square of Number"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ASCII Screen
+class AsciiScreen extends StatefulWidget {
+  const AsciiScreen({super.key});
+
+  @override
+  _AsciiScreenState createState() => _AsciiScreenState();
+}
+
+class _AsciiScreenState extends State<AsciiScreen> {
+  final ApiService apiService = ApiService();
+  String output = "Result will appear here";
+  final TextEditingController controller = TextEditingController();
+
+  void fetchAscii() async {
+    String result = await apiService.getAscii(controller.text);
+    setState(() => output = result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("ASCII Converter")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+                controller: controller,
+                decoration:
+                    const InputDecoration(labelText: "Enter a character")),
+            ElevatedButton(
+                onPressed: fetchAscii, child: const Text("Get ASCII")),
+            Text(output, style: const TextStyle(fontSize: 20)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Reverse String Screen
+class ReverseScreen extends StatefulWidget {
+  const ReverseScreen({super.key});
+
+  @override
+  _ReverseScreenState createState() => _ReverseScreenState();
+}
+
+class _ReverseScreenState extends State<ReverseScreen> {
+  final ApiService apiService = ApiService();
+  String output = "Result will appear here";
+  final TextEditingController controller = TextEditingController();
+
+  void fetchReversed() async {
+    String result = await apiService.reverseString(controller.text);
+    setState(() => output = result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Reverse String")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+                controller: controller,
+                decoration: const InputDecoration(labelText: "Enter a string")),
+            ElevatedButton(
+                onPressed: fetchReversed, child: const Text("Reverse")),
+            Text(output, style: const TextStyle(fontSize: 20)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Square Number Screen
+class SquareScreen extends StatefulWidget {
+  const SquareScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _SquareScreenState createState() => _SquareScreenState();
+}
+
+class _SquareScreenState extends State<SquareScreen> {
+  final ApiService apiService = ApiService();
+  String output = "Result will appear here";
+  final TextEditingController controller = TextEditingController();
+
+  void fetchSquare() async {
+    String result = await apiService.squareNumber(controller.text);
+    setState(() => output = result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Square Number")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+                controller: controller,
+                decoration: const InputDecoration(labelText: "Enter a number")),
+            ElevatedButton(
+                onPressed: fetchSquare, child: const Text("Get Square")),
+            Text(output, style: const TextStyle(fontSize: 20)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
